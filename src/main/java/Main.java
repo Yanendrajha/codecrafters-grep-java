@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -22,6 +21,13 @@ public class Main {
      } else {
          System.exit(1);
      }
+     
+     boolean digitPresent = matchDCharClass(inputLine, pattern);
+     if (digitPresent) {
+         System.exit(0);
+     } else {
+         System.exit(1);
+     }
   }
 
   public static boolean matchPattern(String inputLine, String pattern) {
@@ -30,5 +36,14 @@ public class Main {
     } else {
       throw new RuntimeException("Unhandled pattern: " + pattern);
     }
+  }
+  
+  private static boolean matchDCharClass(String inputLine, String pattern) {
+    for(char c : pattern.toCharArray()){
+        if(Character.isDigit(c)) {
+            return true;
+        }
+    }
+      return false;
   }
 }
