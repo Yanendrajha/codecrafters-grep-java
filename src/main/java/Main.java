@@ -33,6 +33,10 @@ public class Main {
         } else if (pattern.contains("\\w")) {
             return checkIsAlphaNumeric(inputLine);
         } else if (pattern.contains("[")) { // Positive Sequence Group
+            char ch =  pattern.charAt(1);
+            if(ch == '^'){
+                return checkNegativeSequenceGroup(pattern, inputLine);
+            }
             return checkPositiveSequenceGroup(pattern, inputLine);
         }
         else {
@@ -60,6 +64,22 @@ public class Main {
         
         for(char c : inputLine.toCharArray()) {
             if(set.contains(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private static boolean checkNegativeSequenceGroup(String pattern, String inputLine) {
+        int len =  pattern.length();
+        String patternWithoutBracket = pattern.substring(2, len - 1);
+        Set<Character> set = new HashSet<>();
+        for(char c : patternWithoutBracket.toCharArray()) {
+            set.add(c);
+        }
+        
+        for(char c : inputLine.toCharArray()) {
+            if(!set.contains(c)) {
                 return true;
             }
         }
