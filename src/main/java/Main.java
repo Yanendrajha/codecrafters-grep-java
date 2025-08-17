@@ -1,4 +1,6 @@
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public class Main {
     public static void main(String[] args) {
@@ -30,7 +32,10 @@ public class Main {
             return inputLine.chars().anyMatch(Character::isDigit);
         } else if (pattern.contains("\\w")) {
             return checkIsAlphaNumeric(inputLine);
-        } else {
+        } else if (pattern.contains("[")) { // Positive Sequence Group
+            return checkPositiveSequenceGroup(pattern, inputLine);
+        }
+        else {
             throw new RuntimeException("Unhandled pattern: " + pattern);
         }
     }
@@ -38,6 +43,23 @@ public class Main {
     private static boolean checkIsAlphaNumeric(String inputLine) {
         for (char c : inputLine.toCharArray()) {
             if (Character.isLetterOrDigit(c) || c == '_') {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private static boolean checkPositiveSequenceGroup(String pattern, String inputLine) {
+        int len =  pattern.length();
+        String patternWithoutBracket = pattern.substring(1, len - 1);
+        Set<Character> set = new HashSet<>();
+        
+        for(char c : patternWithoutBracket.toCharArray()) {
+            set.add(c);
+        }
+        
+        for(char c : inputLine.toCharArray()) {
+            if(set.contains(c)) {
                 return true;
             }
         }
