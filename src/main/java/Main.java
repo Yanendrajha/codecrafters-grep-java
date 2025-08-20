@@ -16,8 +16,6 @@ public class Main {
         // You can use print statements as follows for debugging, they'll be visible when running tests.
         System.err.println("Logs from your program will appear here!");
         
-        // Uncomment this block to pass the first stage
-        
         if (matchPattern(inputLine, pattern)) {
             System.exit(0);
         } else {
@@ -28,61 +26,80 @@ public class Main {
     public static boolean matchPattern(String inputLine, String pattern) {
         if (pattern.length() == 1) {
             return inputLine.contains(pattern);
-        } else if (pattern.contains("\\d")) {
-            return inputLine.chars().anyMatch(Character::isDigit);
-        } else if (pattern.contains("\\w")) {
-            return checkIsAlphaNumeric(inputLine);
-        } else if (pattern.contains("[")) { // Positive Sequence Group
-            char ch =  pattern.charAt(1);
-            if(ch == '^'){
-                return checkNegativeSequenceGroup(pattern, inputLine);
-            }
-            return checkPositiveSequenceGroup(pattern, inputLine);
         }
-        else {
-            throw new RuntimeException("Unhandled pattern: " + pattern);
+        if (pattern.startsWith("^")) {
+            return matchHere(inputLine, pattern.substring(1));
         }
-    }
-    
-    private static boolean checkIsAlphaNumeric(String inputLine) {
-        for (char c : inputLine.toCharArray()) {
-            if (Character.isLetterOrDigit(c) || c == '_') {
+        
+        for (int i = 0; i <= inputLine.length(); i++) {
+            if (matchHere(inputLine.substring(i), pattern)) {
                 return true;
             }
         }
+        
         return false;
     }
     
-    private static boolean checkPositiveSequenceGroup(String pattern, String inputLine) {
-        int len =  pattern.length();
-        String patternWithoutBracket = pattern.substring(1, len - 1);
-        Set<Character> set = new HashSet<>();
+    private static boolean matchHere(String inputLine, String pattern) {
         
-        for(char c : patternWithoutBracket.toCharArray()) {
-            set.add(c);
+        // BASE CASE 1: If the pattern is empty, we have successfully matched everything.
+        if(pattern.isEmpty()) {
+            return true;
         }
         
-        for(char c : inputLine.toCharArray()) {
-            if(set.contains(c)) {
-                return true;
+        // Handle the '$' anchor for end-of-line.
+        if("$".equals(pattern)) {
+            return inputLine.isEmpty();
+        }
+        
+        // BASE CASE 2: If the pattern is not empty, But the text is.
+        if(inputLine.isEmpty()){
+            return false;
+        }
+        
+        // Handle character groups like [abc] or [^abc]
+        if(pattern.startsWith("[")) {
+            int closingBracketIndex = pattern.indexOf(']');
+            if(closingBracketIndex > 0){
+                boolean isNegative = pattern.charAt(1) == '^';
+                String groupChars = isNegative ?
+                                    pattern.substring(2, closingBracketIndex)
+                                    : pattern.substring(1, closingBracketIndex);
+                
+                char firstCharOfInputLine = inputLine.charAt(0);
+                boolean charInGroup = groupChars.indexOf(firstCharOfInputLine) != -1;
+                
+                if(isNegative != charInGroup) {
+                    return matchHere(inputLine.substring(1), pattern.substring(closingBracketIndex + 1));
+                }
             }
         }
-        return false;
-    }
-    
-    private static boolean checkNegativeSequenceGroup(String pattern, String inputLine) {
-        int len =  pattern.length();
-        String patternWithoutBracket = pattern.substring(2, len - 1);
-        Set<Character> set = new HashSet<>();
-        for(char c : patternWithoutBracket.toCharArray()) {
-            set.add(c);
-        }
         
-        for(char c : inputLine.toCharArray()) {
-            if(!set.contains(c)) {
-                return true;
+        // Handle \d - match any digit
+        else if(pattern.startsWith("\\d")) {
+            if(Character.isDigit(inputLine.charAt(0))) {
+                return matchHere(inputLine.substring(1), pattern.substring(2));
             }
         }
+        
+        // Handle \w - match any alphanumeric character (plus _)
+        else if(pattern.startsWith("\\w")) {
+            char c = inputLine.charAt(0);
+            if(Character.isLetterOrDigit(c) || c == '_') {
+                return matchHere(inputLine.substring(1), pattern.substring(2));
+            }
+        }
+        
+        // Handle '.' - match any single character;
+        else if (pattern.startsWith(".")){
+            return matchHere(inputLine.substring(1), pattern.substring(1));
+        }
+        
+        // Handle a literal character match (the default case)
+        else if(pattern.charAt(0) == inputLine.charAt(0)) {
+            return matchHere(inputLine.substring(1), pattern.substring(1));
+        }
+        
         return false;
     }
 }
