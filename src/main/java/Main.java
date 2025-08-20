@@ -52,6 +52,20 @@ public class Main {
             return inputLine.isEmpty();
         }
         
+        // Check if the next part of the pattern is a character followed by a '+'
+        if(pattern.length() > 1 && pattern.charAt(1) == '+') {
+            char charRepeat = pattern.charAt(0);
+            
+            // Check for the mandatory "one" match.
+            // The first character of the text must match the character to be repeated.
+            // Also handles the '.' wildcard.
+            if(!inputLine.isEmpty() && (charRepeat == inputLine.charAt(0) || charRepeat == '.')){
+                return matchHere(inputLine.substring(1), pattern.substring(2)) ||
+                       matchHere(inputLine.substring(1), pattern);
+            }
+            return false;
+        }
+        
         // BASE CASE 2: If the pattern is not empty, But the text is.
         if(inputLine.isEmpty()){
             return false;
