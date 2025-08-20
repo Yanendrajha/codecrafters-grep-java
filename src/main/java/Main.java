@@ -66,6 +66,24 @@ public class Main {
             return false;
         }
         
+        // Check if the next part of the pattern is a character followed by a '?'
+        if(pattern.length() > 1 && pattern.charAt(1) == '?') {
+            char optionalChar = pattern.charAt(0);
+            String restOfPattern = pattern.substring(2);
+            
+            // Path 1 (One): Try to match the optional character.
+            if (!inputLine.isEmpty() && (optionalChar == '.' || optionalChar == inputLine.charAt(0))) {
+                if (matchHere(inputLine.substring(1), restOfPattern)) {
+                    return true;
+                }
+            }
+            
+            // Path 2 (Zero): If Path 1 fails or isn't taken, try skipping the optional char.
+            return matchHere(inputLine, restOfPattern);
+        }
+        
+        
+        
         // BASE CASE 2: If the pattern is not empty, But the text is.
         if(inputLine.isEmpty()){
             return false;
